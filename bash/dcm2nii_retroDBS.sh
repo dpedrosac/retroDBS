@@ -123,11 +123,28 @@ echo "--------------------------------------------------------------------------
 
 done < $METADATA
 IFS=$OLDIFS
-
 find ${OUTPUT_DIR} \( -name "*REFORMATION*" -o -name "*SCOUT*" \) -exec rm -rf {} \; #remove all scouts and reconstructions
 
+# progress bar function
+prog() {
+    local w=80 p=$1;  shift
+    # create a string of spaces, then change them to dots
+    printf -v dots "%*s" "$(( $p*$w/100 ))" ""; dots=${dots// /.};
+    # print those dots on a fixed-width space plus the percentage etc. 
+}
 
-# A part is needed where only sequences of interest are maintained 
+echo
+echo "--------------------------------------------------------------------------------------"
+echo
+echo " Defacing data: "
+echo
+echo "--------------------------------------------------------------------------------------"
 
-
-# Defacing with python package should be included
+i=1
+for f in ${OUTPUT_DIR}/*.nii ; do 
+	#prog "$i"
+	echo " ... ${f}"
+    sleep .1   # do some work here
+	pydeface $f;
+	i=$((i+1));
+done
