@@ -92,12 +92,12 @@ do
 	
   for i in "${imagingModality[@]}"
     do    
-	TEMP_FOLDER=${INPUT_DIR}/"${Surname,,}_${Name,,}${i}/"
-	echo " $i-sequences from $TEMP_FOLDER"
-	
-	if [[ ! -d ${TEMP_FOLDER} ]]; then
+	DATA_FOLDER=${INPUT_DIR}/"${Surname,,}_${Name,,}${i}/"
+	echo " $i-sequences from $DATA_FOLDER"
+
+	if [[ ! -d ${DATA_FOLDER} ]]; then
 		echo
-		echo " ... folder ${TEMP_FOLDER} inexistent. Continuing!"
+		echo " ... folder ${DATA_FOLDER} inexistent. Continuing!"
 		echo
 	
 	else
@@ -105,21 +105,29 @@ do
 		echo " ... extracting sequences ..."
 		echo
 
+		TMP_DIR=tmp$RANDOM	
+		mkdir -p $TMP_DIR
+
 		${PATH2DCM2NIIX}/dcm2niix \
 		-b y \
 		-ba y \
-		-f ${pseud}_$i_%d.nii.gz\
-		-o ${OUTPUT_DIR} \
-		${TEMP_FOLDER}
+		-f ${pseud}_$i_%d \
+		-o ${TMP_DIR} \
+		${DATA_FOLDER}
 
+		find ${TMP_DIR} \( -name "*t1_mpr*12ch.*" -o -name "*t2_spc*12ch.*" -o -name "*H30*.*" \) -exec mv {} ${OUTPUT_DIR} \;
+		rm -rf ${TMP_DIR}
 	fi
-  done
+	done
 echo "--------------------------------------------------------------------------------------"
 
 done < $METADATA
 IFS=$OLDIFS
 
+find ${OUTPUT_DIR} \( -name "*REFORMATION*" -o -name "*SCOUT*" \) -exec rm -rf {} \; #remove all scouts and reconstructions
+
 
 # A part is needed where only sequences of interest are maintained 
+
 
 # Defacing with python package should be included
