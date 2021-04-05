@@ -47,20 +47,26 @@ do
 	if [[ -z "$FILENAME_T1" || -z "$FILENAME_T2" ]]; then
 			echo "Either the preprocessed T1- or T2-weighted imaging is missing. Proceeding with next subject..." 
 		else
-			echo "Registration of T2-weighted imaging to T1-weighted sequences using ANTs routines"
-			logfile = "logRegistration"${pseud}".txt"
-			${ANTSPATH}/antsRegistrationSyNQuick.sh -d 3 \
-				-f $FILENAME_T1  \
-				-m $FILENAME_T2 \
-				-o $OUTPUT_DIR/${pseud}"_t2_spc_" \
-				-j 1 ${PWD}/$logfile 2>&1
+			filename_check=$OUTPUT_DIR/${pseud}_t2_spc_Warped.nii.gz
+			if [[ ! -e $filename_check ]];
+			then 
+				echo "Registration of T2-weighted imaging to T1-weighted sequences using ANTs routines"
+				${ANTSPATH}/antsRegistrationSyNQuick.sh -d 3 \
+					-f $FILENAME_T1  \
+					-m $FILENAME_T2 \
+					-o $OUTPUT_DIR/${pseud}_t2_spc_ \
+					# -t a \
+					-j 1
 
-			echo
-			echo "--------------------------------------------------------------------------------------"
-			echo " Done registering images for subj: $pseud"
-			echo "--------------------------------------------------------------------------------------"
-			echo
-	fi
+				echo
+				echo "--------------------------------------------------------------------------------------"
+				echo " Done registering images for subj: $pseud"
+				echo "--------------------------------------------------------------------------------------"
+				echo
+			else
+				echo "Registration of T2-weighted imaging to T1-weighted sequences using ANTs routines for subj: $pseud already finished."
+			fi
+		fi
 
-done < $METADATA
+	done < $METADATA
 IFS=$OLDIFS
